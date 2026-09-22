@@ -95,7 +95,6 @@ export default function TestContainer() {
 
   const handleSubmit = async (auto = false) => {
     if (submitting) return;
-    if (!auto && !window.confirm(t("test.confirm_submit"))) return;
 
     setSubmitting(true);
     const payload = questions.map((q) => ({
