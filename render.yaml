@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: iq-test-frontend
+    runtime: static
+    region: frankfurt
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        value: "https://iq-test-backend.onrender.com/api/v1"
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
