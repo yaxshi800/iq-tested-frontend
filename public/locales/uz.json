@@ -1,0 +1,55 @@
+{
+  "app": {
+    "title": "CogniTest",
+    "tagline": "Kognitiv salohiyatingizni o‘lchang"
+  },
+  "nav": {
+    "home": "Asosiy",
+    "start": "Testni boshlash",
+    "language": "Til"
+  },
+  "landing": {
+    "hero_title": "IQ darajangizni 40 daqiqada bilib oling",
+    "hero_subtitle": "To‘rt fikrlash sohasi bo‘yicha 40 savoldan iborat standartlashtirilgan test.",
+    "instructions_title": "Ko‘rsatmalar",
+    "instructions": [
+      "Test 40 ta savoldan iborat va 40 daqiqa davom etadi.",
+      "To‘rt soha: naqshni aniqlash, fazoviy tasavvur, sonli ketma-ketliklar, mavhum fikrlash.",
+      "Har bir savolda bitta to‘g‘ri javob bor. Tez tanlash uchun 1–4 tugmalaridan foydalaning.",
+      "Vaqt tugagach, test avtomatik yuboriladi. Sahifani yangilamang."
+    ],
+    "begin": "Testni boshlash",
+    "domains": {
+      "pattern": "Naqshni aniqlash",
+      "spatial": "Fazoviy tasavvur",
+      "numerical": "Sonli fikrlash",
+      "abstract": "Mavhum fikrlash"
+    }
+  },
+  "test": {
+    "question_of": "{{total}} savoldan {{current}}-savol",
+    "time_remaining": "Qolgan vaqt",
+    "submit": "Yuborish",
+    "next": "Keyingi",
+    "previous": "Oldingi",
+    "confirm_submit": "Javoblaringizni yuborishni xohlaysizmi?",
+    "confirm_yes": "Ha, yuborish",
+    "confirm_no": "Davom etish",
+    "time_up": "Vaqt tugadi! Javoblar yuborilmoqda…",
+    "loading": "Test tayyorlanmoqda…"
+  },
+  "results": {
+    "title": "Sizning kognitiv profilingiz",
+    "iq_label": "Sizning IQ darajangiz",
+    "percentile": "Persentil",
+    "percentile_badge": "Aholining {{value}}% dan yuqori",
+    "distribution": "Aholi taqsimoti",
+    "your_position": "Siz",
+    "category_performance": "Kategoriya bo‘yicha natijalar",
+    "raw_score": "Xom ball",
+    "accuracy": "Aniqlik",
+    "time_spent": "Sarflangan vaqt",
+    "retake": "Qayta topshirish",
+    "share": "Natijani ulashish"
+  }
+}

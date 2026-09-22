@@ -1,0 +1,55 @@
+{
+  "app": {
+    "title": "CogniTest",
+    "tagline": "Measure your cognitive potential"
+  },
+  "nav": {
+    "home": "Home",
+    "start": "Begin Assessment",
+    "language": "Language"
+  },
+  "landing": {
+    "hero_title": "Discover Your IQ in 40 Minutes",
+    "hero_subtitle": "A standardized 40-question cognitive assessment across four reasoning domains.",
+    "instructions_title": "Instructions",
+    "instructions": [
+      "The test contains 40 questions and lasts exactly 40 minutes.",
+      "Four domains: Pattern Recognition, Spatial Visualization, Numerical Sequences, Abstract Reasoning.",
+      "Each question has one correct answer. Use keys 1–4 for fast selection.",
+      "The timer auto-submits when it expires. Do not refresh the page."
+    ],
+    "begin": "Begin Assessment",
+    "domains": {
+      "pattern": "Pattern Recognition",
+      "spatial": "Spatial Visualization",
+      "numerical": "Numerical Reasoning",
+      "abstract": "Abstract Reasoning"
+    }
+  },
+  "test": {
+    "question_of": "Question {{current}} of {{total}}",
+    "time_remaining": "Time Remaining",
+    "submit": "Submit",
+    "next": "Next",
+    "previous": "Previous",
+    "confirm_submit": "Are you sure you want to submit your answers?",
+    "confirm_yes": "Yes, submit",
+    "confirm_no": "Keep working",
+    "time_up": "Time is up! Submitting your answers…",
+    "loading": "Preparing your assessment…"
+  },
+  "results": {
+    "title": "Your Cognitive Profile",
+    "iq_label": "Your IQ Score",
+    "percentile": "Percentile",
+    "percentile_badge": "Better than {{value}}% of the population",
+    "distribution": "Population Distribution",
+    "your_position": "You",
+    "category_performance": "Performance by Category",
+    "raw_score": "Raw Score",
+    "accuracy": "Accuracy",
+    "time_spent": "Time Spent",
+    "retake": "Retake Test",
+    "share": "Share Result"
+  }
+}
