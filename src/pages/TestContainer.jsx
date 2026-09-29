@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, ChevronLeft, ChevronRight, Send, Grid3x3 } from "lucide-react";
 import clsx from "clsx";
 import { startTest, submitTest } from "../api/client";
-import LanguageSwitcher from "../components/LanguageSwitcher";
 
 const TOTAL_SECONDS = 40 * 60;
 
@@ -16,7 +15,7 @@ export default function TestContainer() {
   const [questions, setQuestions] = useState([]);
   const [sessionUuid, setSessionUuid] = useState(null);
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [answers, setAnswers] = useState({});     // { qid: {selected_index, time_spent} }
+  const [answers, setAnswers] = useState({});
   const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -24,7 +23,7 @@ export default function TestContainer() {
 
   const questionStartRef = useRef(Date.now());
 
-  /* ---------- Bootstrap test ---------- */
+  /* ─── Bootstrap test ─── */
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -38,10 +37,12 @@ export default function TestContainer() {
         setLoading(false);
       }
     })();
-    return () => { mounted = false; };
-  }, []); // eslint-disable-line
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-  /* ---------- Countdown timer ---------- */
+  /* ─── Countdown timer ─── */
   useEffect(() => {
     if (loading || submitting) return;
     const id = setInterval(() => {
@@ -55,14 +56,14 @@ export default function TestContainer() {
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [loading, submitting]); // eslint-disable-line
+  }, [loading, submitting]);
 
-  /* ---------- Track per-question time ---------- */
+  /* ─── Track per-question time ─── */
   useEffect(() => {
     questionStartRef.current = Date.now();
   }, [currentIdx]);
 
-  /* ---------- Keyboard shortcuts 1..4, arrow nav ---------- */
+  /* ─── Keyboard shortcuts ─── */
   useEffect(() => {
     const onKey = (e) => {
       const q = questions[currentIdx];
@@ -77,12 +78,14 @@ export default function TestContainer() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [currentIdx, questions]); // eslint-disable-line
+  }, [currentIdx, questions]);
 
   const selectOption = (idx) => {
     const q = questions[currentIdx];
     if (!q) return;
-    const time_spent = Math.round((Date.now() - questionStartRef.current) / 1000);
+    const time_spent = Math.round(
+      (Date.now() - questionStartRef.current) / 1000
+    );
     setAnswers((prev) => {
       const prevTime = prev[q.id]?.time_spent || 0;
       return {
@@ -105,7 +108,9 @@ export default function TestContainer() {
 
     try {
       const res = await submitTest(sessionUuid, payload);
-      navigate(`/results/${res.result.uuid}`, { state: { result: res.result } });
+      navigate(`/results/${res.result.uuid}`, {
+        state: { result: res.result },
+      });
     } catch (err) {
       console.error(err);
       setSubmitting(false);
@@ -113,33 +118,39 @@ export default function TestContainer() {
   };
 
   const formatTime = (s) => {
-    const m = Math.floor(s / 60).toString().padStart(2, "0");
+    const m = Math.floor(s / 60)
+      .toString()
+      .padStart(2, "0");
     const sec = (s % 60).toString().padStart(2, "0");
     return `${m}:${sec}`;
   };
 
   const currentQ = questions[currentIdx];
   const answeredCount = Object.keys(answers).length;
-  const progress = questions.length ? (answeredCount / questions.length) * 100 : 0;
+  const progress = questions.length
+    ? (answeredCount / questions.length) * 100
+    : 0;
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-slate-200">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-700 dark:bg-slate-950 dark:text-slate-200">
         <div className="animate-pulse text-lg">{t("test.loading")}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100">
-      {/* ---------- Top bar ---------- */}
-      <header className="sticky top-0 z-30 border-b border-white/5 bg-slate-950/70 backdrop-blur-xl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
+      {/* ─── Top bar ─── */}
+      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/70 backdrop-blur-xl dark:border-white/5 dark:bg-slate-950/70">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <div
             className={clsx(
               "flex items-center gap-2 rounded-xl px-4 py-2 font-mono text-lg font-semibold",
-              "border border-white/10 bg-white/5 backdrop-blur",
-              secondsLeft < 300 ? "text-rose-400 animate-pulse" : "text-indigo-300"
+              "border backdrop-blur",
+              secondsLeft < 300
+                ? "border-rose-400/30 bg-rose-500/10 text-rose-500 dark:text-rose-400"
+                : "border-slate-200 bg-white/60 text-indigo-600 dark:border-white/10 dark:bg-white/5 dark:text-indigo-300"
             )}
           >
             <Clock className="h-5 w-5" />
@@ -147,10 +158,10 @@ export default function TestContainer() {
           </div>
 
           <div className="hidden flex-1 items-center gap-3 md:flex">
-            <span className="text-sm text-slate-400 whitespace-nowrap">
+            <span className="whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
               {answeredCount} / {questions.length}
             </span>
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/5">
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-slate-200 dark:bg-white/5">
               <motion.div
                 className="h-full bg-gradient-to-r from-indigo-500 to-violet-500"
                 initial={{ width: 0 }}
@@ -163,27 +174,30 @@ export default function TestContainer() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowGrid((s) => !s)}
-              className="rounded-xl border border-white/10 bg-white/5 p-2 hover:bg-white/10"
+              className="rounded-xl border border-slate-200 bg-white/60 p-2 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
               title="Question grid"
             >
-              <Grid3x3 className="h-5 w-5 text-indigo-300" />
+              <Grid3x3 className="h-5 w-5 text-indigo-600 dark:text-indigo-300" />
             </button>
-            <LanguageSwitcher compact />
           </div>
         </div>
       </header>
 
-      {/* ---------- Grid overlay ---------- */}
+      {/* ─── Grid overlay ─── */}
       <AnimatePresence>
         {showGrid && (
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/80 backdrop-blur"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/60 backdrop-blur dark:bg-slate-950/80"
             onClick={() => setShowGrid(false)}
           >
             <motion.div
-              initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }}
-              className="grid max-w-2xl grid-cols-8 gap-2 rounded-2xl border border-white/10 bg-slate-900/90 p-6"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+              className="grid max-w-2xl grid-cols-8 gap-2 rounded-2xl border border-slate-200 bg-white/95 p-6 shadow-2xl dark:border-white/10 dark:bg-slate-900/90"
               onClick={(e) => e.stopPropagation()}
             >
               {questions.map((q, i) => {
@@ -192,13 +206,16 @@ export default function TestContainer() {
                 return (
                   <button
                     key={q.id}
-                    onClick={() => { setCurrentIdx(i); setShowGrid(false); }}
+                    onClick={() => {
+                      setCurrentIdx(i);
+                      setShowGrid(false);
+                    }}
                     className={clsx(
                       "h-10 w-10 rounded-lg border text-sm font-medium transition",
                       active && "ring-2 ring-indigo-400",
                       answered
-                        ? "bg-indigo-500/30 border-indigo-400/50 text-white"
-                        : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"
+                        ? "border-indigo-400/50 bg-indigo-500/30 text-indigo-900 dark:text-white"
+                        : "border-slate-200 bg-white text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-400 dark:hover:bg-white/10"
                     )}
                   >
                     {i + 1}
@@ -210,10 +227,13 @@ export default function TestContainer() {
         )}
       </AnimatePresence>
 
-      {/* ---------- Question card ---------- */}
+      {/* ─── Question card ─── */}
       <main className="mx-auto max-w-4xl px-4 py-8">
-        <div className="mb-4 text-sm text-slate-400">
-          {t("test.question_of", { current: currentIdx + 1, total: questions.length })}
+        <div className="mb-4 text-sm text-slate-600 dark:text-slate-400">
+          {t("test.question_of", {
+            current: currentIdx + 1,
+            total: questions.length,
+          })}
         </div>
 
         <AnimatePresence mode="wait">
@@ -224,9 +244,9 @@ export default function TestContainer() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: 0.25 }}
-              className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl shadow-2xl"
+              className="rounded-3xl border border-slate-200 bg-white/60 p-8 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-white/5"
             >
-              <div className="mb-6 text-lg leading-relaxed text-slate-100">
+              <div className="mb-6 text-lg leading-relaxed text-slate-900 dark:text-slate-100">
                 {currentQ.text}
               </div>
 
@@ -235,14 +255,15 @@ export default function TestContainer() {
                   <img
                     src={currentQ.image_url}
                     alt="matrix"
-                    className="max-h-72 rounded-xl border border-white/10"
+                    className="max-h-72 rounded-xl border border-slate-200 dark:border-white/10"
                   />
                 </div>
               )}
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 {currentQ.options.map((opt, i) => {
-                  const selected = answers[currentQ.id]?.selected_index === i;
+                  const selected =
+                    answers[currentQ.id]?.selected_index === i;
                   return (
                     <button
                       key={i}
@@ -250,8 +271,8 @@ export default function TestContainer() {
                       className={clsx(
                         "group flex items-center gap-3 rounded-xl border px-4 py-4 text-left transition-all",
                         selected
-                          ? "border-indigo-400 bg-indigo-500/20 text-white shadow-lg shadow-indigo-500/20"
-                          : "border-white/10 bg-white/5 hover:border-indigo-400/50 hover:bg-white/10 text-slate-200"
+                          ? "border-indigo-400 bg-indigo-500/20 text-slate-900 shadow-lg shadow-indigo-500/20 dark:text-white"
+                          : "border-slate-200 bg-white/60 text-slate-700 hover:border-indigo-400/50 hover:bg-white/80 dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10"
                       )}
                     >
                       <span
@@ -259,7 +280,7 @@ export default function TestContainer() {
                           "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-sm font-bold",
                           selected
                             ? "border-indigo-400 bg-indigo-500 text-white"
-                            : "border-white/20 bg-white/5 text-slate-300 group-hover:border-indigo-400/60"
+                            : "border-slate-200 bg-white text-slate-600 group-hover:border-indigo-400/60 dark:border-white/20 dark:bg-white/5 dark:text-slate-300"
                         )}
                       >
                         {i + 1}
@@ -273,20 +294,22 @@ export default function TestContainer() {
           )}
         </AnimatePresence>
 
-        {/* ---------- Footer nav ---------- */}
+        {/* ─── Footer nav ─── */}
         <div className="mt-6 flex items-center justify-between">
           <button
             disabled={currentIdx === 0}
             onClick={() => setCurrentIdx((i) => Math.max(0, i - 1))}
-            className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 hover:bg-white/10 disabled:opacity-40"
+            className="btn-ghost disabled:opacity-40"
           >
             <ChevronLeft className="h-4 w-4" /> {t("test.previous")}
           </button>
 
           {currentIdx < questions.length - 1 ? (
             <button
-              onClick={() => setCurrentIdx((i) => Math.min(questions.length - 1, i + 1))}
-              className="flex items-center gap-2 rounded-xl bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400"
+              onClick={() =>
+                setCurrentIdx((i) => Math.min(questions.length - 1, i + 1))
+              }
+              className="btn-primary"
             >
               {t("test.next")} <ChevronRight className="h-4 w-4" />
             </button>
@@ -294,7 +317,7 @@ export default function TestContainer() {
             <button
               onClick={() => handleSubmit(false)}
               disabled={submitting}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 hover:opacity-90 disabled:opacity-50"
+              className="btn-primary"
             >
               <Send className="h-4 w-4" /> {t("test.submit")}
             </button>
@@ -303,8 +326,8 @@ export default function TestContainer() {
       </main>
 
       {submitting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur">
-          <div className="animate-pulse text-lg text-indigo-300">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur dark:bg-slate-950/80">
+          <div className="animate-pulse text-lg text-indigo-600 dark:text-indigo-300">
             {t("test.time_up")}
           </div>
         </div>
