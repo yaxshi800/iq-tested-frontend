@@ -10,7 +10,7 @@ import TestContainer from "./pages/TestContainer";
 import ResultDashboard from "./pages/ResultDashboard";
 import Certificate from "./pages/Certificate";
 import AIAdvisor from "./pages/AIAdvisor";
-
+import InstallPrompt from "./components/InstallPrompt";
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("access_token");
   return token ? children : <Navigate to="/login" replace />;
