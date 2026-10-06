@@ -17,12 +17,3 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     </Suspense>
   </React.StrictMode>
 );
-
-// Register service worker (auto-injected by vite-plugin-pwa)
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.ready.then(() => {
-      console.log("✅ CogniTest PWA is ready");
-    });
-  });
-}

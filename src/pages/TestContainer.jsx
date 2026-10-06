@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, ChevronLeft, ChevronRight, Send, Grid3x3 } from "lucide-react";
 import clsx from "clsx";
@@ -11,6 +11,7 @@ const TOTAL_SECONDS = 40 * 60;
 export default function TestContainer() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const { category = "iq" } = useParams();
 
   const [questions, setQuestions] = useState([]);
   const [sessionUuid, setSessionUuid] = useState(null);
@@ -26,21 +27,27 @@ export default function TestContainer() {
   /* ─── Bootstrap test ─── */
   useEffect(() => {
     let mounted = true;
-    (async () => {
+
+    const init = async () => {
       try {
-        const data = await startTest(i18n.language);
+        const data = await startTest(category, i18n.language);
         if (!mounted) return;
-        setQuestions(data.questions);
+        setQuestions(data.questions || []);
         setSessionUuid(data.session_uuid);
         setSecondsLeft(data.duration_seconds || TOTAL_SECONDS);
+      } catch (err) {
+        console.error("Failed to start test:", err);
       } finally {
-        setLoading(false);
+        if (mounted) setLoading(false);
       }
-    })();
+    };
+
+    init();
+
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [category]); // eslint-disable-line
 
   /* ─── Countdown timer ─── */
   useEffect(() => {
@@ -56,7 +63,7 @@ export default function TestContainer() {
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [loading, submitting]);
+  }, [loading, submitting]); // eslint-disable-line
 
   /* ─── Track per-question time ─── */
   useEffect(() => {
@@ -78,7 +85,7 @@ export default function TestContainer() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [currentIdx, questions]);
+  }, [currentIdx, questions]); // eslint-disable-line
 
   const selectOption = (idx) => {
     const q = questions[currentIdx];
@@ -139,9 +146,19 @@ export default function TestContainer() {
     );
   }
 
+  if (!questions.length) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-slate-50 p-4 text-slate-700 dark:bg-slate-950 dark:text-slate-200">
+        <div className="text-lg">Bu test uchun savollar topilmadi.</div>
+        <button onClick={() => navigate("/home")} className="btn-primary">
+          Bosh sahifaga qaytish
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
-      {/* ─── Top bar ─── */}
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/70 backdrop-blur-xl dark:border-white/5 dark:bg-slate-950/70">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <div
@@ -183,7 +200,6 @@ export default function TestContainer() {
         </div>
       </header>
 
-      {/* ─── Grid overlay ─── */}
       <AnimatePresence>
         {showGrid && (
           <motion.div
@@ -227,7 +243,6 @@ export default function TestContainer() {
         )}
       </AnimatePresence>
 
-      {/* ─── Question card ─── */}
       <main className="mx-auto max-w-4xl px-4 py-8">
         <div className="mb-4 text-sm text-slate-600 dark:text-slate-400">
           {t("test.question_of", {
@@ -294,7 +309,6 @@ export default function TestContainer() {
           )}
         </AnimatePresence>
 
-        {/* ─── Footer nav ─── */}
         <div className="mt-6 flex items-center justify-between">
           <button
             disabled={currentIdx === 0}

@@ -1,28 +1,38 @@
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Brain,
-  Clock,
-  Grid3x3,
   Hash,
-  Layers,
+  BookOpen,
+  Languages,
   ArrowRight,
   Sparkles,
   Crown,
   Bot,
+  Clock,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
+import api from "../api/client";
 
-const DOMAIN_META = [
-  { key: "pattern", Icon: Grid3x3 },
-  { key: "spatial", Icon: Layers },
-  { key: "numerical", Icon: Hash },
-  { key: "abstract", Icon: Sparkles },
-];
+const ICONS = {
+  Brain: Brain,
+  Hash: Hash,
+  BookOpen: BookOpen,
+  Languages: Languages,
+};
 
 export default function Landing() {
   const { t } = useTranslation();
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    api
+      .get("/test/categories/")
+      .then((r) => setCategories(r.data))
+      .catch(() => setCategories([]));
+  }, []);
 
   return (
     <div className="min-h-screen">
@@ -35,26 +45,20 @@ export default function Landing() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <motion.img
-            src="/logo.png"
-            alt="CogniTest"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="mx-auto mb-6 h-24 w-24 object-contain drop-shadow-2xl"
-          />
-
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 shadow-2xl shadow-indigo-500/40">
+            <Brain className="h-8 w-8 text-white" />
+          </div>
           <h1 className="text-gradient mx-auto max-w-3xl text-4xl font-black tracking-tight md:text-6xl">
             {t("landing.hero_title")}
           </h1>
-
           <p className="mx-auto mt-5 max-w-2xl text-base text-slate-600 md:text-lg dark:text-slate-400">
             {t("landing.hero_subtitle")}
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link to="/test" className="btn-primary px-8 py-4 text-base">
-              {t("landing.begin")}
+            <Link to="/test/mixed" className="btn-primary px-8 py-4 text-base">
+              IQ Testni boshlash
+
               <ArrowRight className="h-5 w-5" />
             </Link>
             <Link
@@ -66,6 +70,55 @@ export default function Landing() {
             </Link>
           </div>
         </motion.div>
+      </section>
+
+      {/* ═══════════════════════════════════════════
+          4 TA TEST TURI
+          ═══════════════════════════════════════════ */}
+      <section className="mx-auto max-w-6xl px-4 py-12">
+        <h2 className="mb-8 text-center text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">
+          Test turlari
+        </h2>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+          {categories.map((cat, idx) => {
+            const Icon = ICONS[cat.icon] || Brain;
+            return (
+              <motion.div
+                key={cat.code}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.08 }}
+              >
+                <Link
+                  to={`/test/${cat.code}`}
+                  className="glass group block h-full rounded-3xl p-6 transition hover:border-indigo-400/40 hover:shadow-2xl hover:shadow-indigo-500/20"
+                >
+                  <div
+                    className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-${cat.color}-500/20 text-${cat.color}-500`}
+                  >
+                    <Icon className="h-7 w-7" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                    {cat.name_uz}
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                    {cat.description_uz}
+                  </p>
+                  <div className="mt-4 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                      <Clock className="h-3.5 w-3.5" />
+                      {Math.floor(cat.duration_seconds / 60)} daqiqa
+                    </div>
+                    <span className="flex items-center gap-1 text-sm font-medium text-indigo-600 dark:text-indigo-400">
+                      Boshlash
+                      <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                    </span>
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </div>
       </section>
 
       {/* AI Advisor CTA */}
@@ -86,9 +139,8 @@ export default function Landing() {
                 AI Yordamchi
               </h2>
               <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
-                Imtihon (IELTS, CEFR, SAT) yoki kasb (Full Stack, Python) haqida
-                so'rang — AI sizga maslahat, kitoblar va YouTube kanallarini
-                topib beradi.
+                Imtihon (IELTS, CEFR, SAT) yoki kasb haqida so'rang — AI sizga
+                maslahat, kitoblar va YouTube kanallarini topib beradi.
               </p>
             </div>
             <Link
@@ -102,54 +154,6 @@ export default function Landing() {
         </motion.div>
       </section>
 
-      {/* Domains */}
-      <section className="mx-auto max-w-6xl px-4 py-8">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {DOMAIN_META.map(({ key, Icon }, idx) => (
-            <motion.div
-              key={key}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.08 }}
-              className="glass rounded-2xl p-5"
-            >
-              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-600 dark:text-indigo-300">
-                <Icon className="h-5 w-5" />
-              </div>
-              <div className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                {t(`landing.domains.${key}`)}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      {/* Instructions */}
-      <section className="mx-auto max-w-3xl px-4 py-12">
-        <div className="glass rounded-3xl p-8">
-          <h2 className="mb-4 text-2xl font-bold text-slate-900 dark:text-white">
-            {t("landing.instructions_title")}
-          </h2>
-          <ul className="space-y-3">
-            {t("landing.instructions", { returnObjects: true }).map((line, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3 text-slate-700 dark:text-slate-300"
-              >
-                <span className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-indigo-400/40 bg-indigo-500/10 text-xs font-semibold text-indigo-600 dark:text-indigo-300">
-                  {i + 1}
-                </span>
-                <span className="text-sm leading-relaxed">{line}</span>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-6 flex items-center gap-3 rounded-xl border border-amber-400/20 bg-amber-400/5 p-4 text-sm text-amber-700 dark:text-amber-200">
-            <Clock className="h-5 w-5 shrink-0" />
-            <span>40:00 — vaqt tugagach avtomatik yuboriladi.</span>
-          </div>
-        </div>
-      </section>
-
       {/* Tarif CTA */}
       <section className="mx-auto max-w-4xl px-4 py-12">
         <motion.div
@@ -158,7 +162,6 @@ export default function Landing() {
           viewport={{ once: true }}
           className="relative overflow-hidden rounded-3xl border border-amber-400/30 bg-gradient-to-br from-amber-500/10 to-orange-500/10 p-8 text-center backdrop-blur-xl"
         >
-          <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-amber-500/20 blur-3xl" />
           <div className="relative">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/20">
               <Crown className="h-8 w-8 text-amber-500" />
@@ -167,13 +170,12 @@ export default function Landing() {
               Pro yoki Ultimate tarifga o‘ting
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-sm text-slate-600 dark:text-slate-300">
-              Sertifikat olish, batafsil statistika va PDF hisobot uchun Pro
-              tarifga o‘ting.
+              Sertifikat olish va batafsil statistika uchun Pro tarifga o‘ting.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link
                 to="/pricing"
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-amber-500/30 transition hover:brightness-110"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-amber-500/30"
               >
                 <Crown className="h-4 w-4" />
                 Tariflarni ko‘rish

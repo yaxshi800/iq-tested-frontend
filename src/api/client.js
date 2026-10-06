@@ -9,17 +9,24 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Public endpoints — no token required
+// Public endpoints — token kerak emas
 const PUBLIC_ENDPOINTS = [
   "/auth/register/",
   "/auth/token/",
   "/auth/token/refresh/",
   "/test/start/",
   "/test/submit/",
+  "/test/categories/",
 ];
 
 function isPublicEndpoint(url) {
-  return PUBLIC_ENDPOINTS.some((e) => url && url.includes(e));
+  if (!url) return false;
+  for (var i = 0; i < PUBLIC_ENDPOINTS.length; i++) {
+    if (url.indexOf(PUBLIC_ENDPOINTS[i]) !== -1) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // Request interceptor
@@ -28,7 +35,7 @@ api.interceptors.request.use(
     config.headers["Accept-Language"] = i18n.language || "uz";
 
     if (!isPublicEndpoint(config.url)) {
-      const token = localStorage.getItem("access_token");
+      var token = localStorage.getItem("access_token");
       if (token) {
         config.headers.Authorization = "Bearer " + token;
       }
@@ -48,7 +55,7 @@ api.interceptors.response.use(
   },
   function (error) {
     if (error && error.response && error.response.status === 401) {
-      const url = error.config?.url || "";
+      var url = (error.config && error.config.url) || "";
       if (!isPublicEndpoint(url)) {
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
@@ -66,57 +73,78 @@ api.interceptors.response.use(
 export const login = function (username, password) {
   return api
     .post("/auth/token/", { username: username, password: password })
-    .then((r) => r.data);
+    .then(function (r) {
+      return r.data;
+    });
 };
 
 export const register = function (data) {
-  return api.post("/auth/register/", data).then((r) => r.data);
+  return api.post("/auth/register/", data).then(function (r) {
+    return r.data;
+  });
 };
 
 export const getMe = function () {
-  return api.get("/auth/me/").then((r) => r.data);
+  return api.get("/auth/me/").then(function (r) {
+    return r.data;
+  });
 };
 
 export const updateProfile = function (data) {
-  return api.patch("/auth/profile/", data).then((r) => r.data);
+  return api.patch("/auth/profile/", data).then(function (r) {
+    return r.data;
+  });
 };
 
 // ─── Payment ───
 export const processPayment = function (data) {
-  return api.post("/auth/payment/", data).then((r) => r.data);
+  return api.post("/auth/payment/", data).then(function (r) {
+    return r.data;
+  });
 };
 
 export const myPayments = function () {
-  return api.get("/auth/payments/").then((r) => r.data);
+  return api.get("/auth/payments/").then(function (r) {
+    return r.data;
+  });
 };
 
 export const planPrices = function () {
-  return api.get("/auth/plans/").then((r) => r.data);
+  return api.get("/auth/plans/").then(function (r) {
+    return r.data;
+  });
 };
 
 // ─── Test ───
-export const startTest = function (language) {
+export const getCategories = function () {
+  return api.get("/test/categories/").then(function (r) {
+    return r.data;
+  });
+};
+
+export const startTest = function (category, language) {
   return api
-    .post("/test/start/", { language: language || "uz" })
-    .then((r) => r.data);
+    .post("/test/start/", {
+      category: category || "iq",
+      language: language || "uz",
+    })
+    .then(function (r) {
+      return r.data;
+    });
 };
 
 export const submitTest = function (session_uuid, answers) {
   return api
     .post("/test/submit/", { session_uuid: session_uuid, answers: answers })
-    .then((r) => r.data);
+    .then(function (r) {
+      return r.data;
+    });
 };
 
 export const getResults = function (uuid) {
-  return api.get("/test/results/" + uuid + "/").then((r) => r.data);
-};
-
-export const issueCertificate = function (uuid) {
-  return api.post("/test/certificate/" + uuid + "/").then((r) => r.data);
-};
-
-export const verifyCertificate = function (certUuid) {
-  return api.get("/test/verify/" + certUuid + "/").then((r) => r.data);
+  return api.get("/test/results/" + uuid + "/").then(function (r) {
+    return r.data;
+  });
 };
 
 export default api;

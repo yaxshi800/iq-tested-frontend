@@ -77,7 +77,7 @@ export default function Login() {
         transition={{ duration: 0.4 }}
         className="w-full max-w-md rounded-3xl border border-slate-200 bg-white/80 p-8 backdrop-blur-xl dark:border-white/10 dark:bg-white/5"
       >
-        {/* Logo */}
+        {/* Header */}
         <div className="mb-6 text-center">
           <img
             src="/logo.png"
@@ -113,7 +113,7 @@ export default function Login() {
             />
           </div>
 
-          {/* Email (faqat register) */}
+          {/* Email (register only) */}
           {mode === "register" && (
             <div className="relative">
               <Mail className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
@@ -128,7 +128,7 @@ export default function Login() {
             </div>
           )}
 
-          {/* Parol */}
+          {/* Password */}
           <div className="relative">
             <Lock className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
             <input
@@ -144,7 +144,7 @@ export default function Login() {
             />
           </div>
 
-          {/* Parol 2 (faqat register) */}
+          {/* Password2 (register only) */}
           {mode === "register" && (
             <div className="relative">
               <Lock className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
@@ -162,14 +162,14 @@ export default function Login() {
             </div>
           )}
 
-          {/* Xato */}
+          {/* Error */}
           {error && (
             <div className="rounded-xl border border-rose-400/30 bg-rose-400/10 px-4 py-2 text-sm text-rose-600 dark:text-rose-300">
               {error}
             </div>
           )}
 
-          {/* Yuborish */}
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
@@ -183,7 +183,7 @@ export default function Login() {
           </button>
         </form>
 
-        {/* Rejim almashtirish */}
+        {/* Mode switch */}
         <button
           onClick={() => {
             setMode(mode === "login" ? "register" : "login");
@@ -196,7 +196,7 @@ export default function Login() {
             : "Akkauntingiz bormi? Kirish"}
         </button>
 
-        {/* Bosh sahifa */}
+        {/* Back to home */}
         <Link
           to="/"
           className="mt-4 block text-center text-xs text-slate-500 hover:text-slate-700 dark:text-slate-500 dark:hover:text-slate-300"

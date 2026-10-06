@@ -12,8 +12,6 @@ import {
   ResponsiveContainer,
   ReferenceDot,
   CartesianGrid,
-} from "recharts";
-import {
   Radar,
   RadarChart,
   PolarGrid,
@@ -53,7 +51,7 @@ export default function ResultDashboard() {
       api
         .get("/auth/me/")
         .then((r) => setProfile(r.data.profile))
-        .catch(() => {});
+        .catch(() => { });
     }
   }, [uuid]);
 
@@ -74,6 +72,11 @@ export default function ResultDashboard() {
   }));
 
   const userPlan = profile?.plan || "free";
+  const isIQTest = data.test_category?.code === "iq";
+  const isMixed = !data.test_category;
+  const percentage = data.total_questions
+    ? Math.round((data.correct_count / data.total_questions) * 100)
+    : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
@@ -86,13 +89,18 @@ export default function ResultDashboard() {
           className="text-center"
         >
           <h1 className="text-gradient text-3xl font-black tracking-tight md:text-4xl">
-            {t("results.title")}
+            {data.test_category?.name_uz || t("results.title")}
           </h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Sizning kognitiv natijangiz tayyor
+            {isIQTest
+              ? "Sizning kognitiv natijangiz tayyor"
+              : "Sizning test natijangiz tayyor"}
           </p>
         </motion.div>
 
+        {/* ═══════════════════════════════════════════
+            ASOSIY NATIJA
+            ═══════════════════════════════════════════ */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -101,34 +109,69 @@ export default function ResultDashboard() {
         >
           <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl" />
           <div className="relative grid gap-8 md:grid-cols-2 md:items-center">
-            <div>
-              <div className="mb-2 text-sm uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
-                {t("results.iq_label")}
+            {/* IQ test uchun */}
+            {isIQTest ? (
+              <div>
+                <div className="mb-2 text-sm uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
+                  {t("results.iq_label")}
+                </div>
+                <div className="flex items-end gap-4">
+                  <motion.span
+                    initial={{ scale: 0.6, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 180, delay: 0.2 }}
+                    className="text-gradient text-8xl font-black leading-none"
+                  >
+                    {data.iq_score}
+                  </motion.span>
+                  <span className="mb-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-sm text-emerald-600 dark:text-emerald-300">
+                    <Award className="mr-1 inline h-4 w-4" />
+                    {data.percentile}%
+                  </span>
+                </div>
               </div>
-              <div className="flex items-end gap-4">
-                <motion.span
+            ) : (
+              /* Boshqa testlar uchun — foiz */
+              <div>
+                <div className="mb-2 text-sm uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
+                  Natija
+                </div>
+                <motion.div
                   initial={{ scale: 0.6, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", stiffness: 180, delay: 0.2 }}
                   className="text-gradient text-8xl font-black leading-none"
                 >
-                  {data.iq_score}
-                </motion.span>
-                <span className="mb-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-sm text-emerald-600 dark:text-emerald-300">
-                  <Award className="mr-1 inline h-4 w-4" />
-                  {data.percentile}%
-                </span>
+                  {percentage}%
+                </motion.div>
+                <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                  {data.correct_count} ta to'g'ri javob
+                </div>
               </div>
-              <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-                {t("results.percentile_badge", { value: data.percentile })}
-              </div>
-            </div>
+            )}
 
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-3 gap-4 text-sm">
               <Stat
-                label={t("results.accuracy")}
-                value={`${Math.round(data.accuracy * 100)}%`}
+                label="To'g'ri"
+                value={`${data.correct_count}/${data.total_questions}`}
+                color="emerald"
               />
+              <Stat
+                label="Noto'g'ri"
+                value={`${data.wrong_count}/${data.total_questions}`}
+                color="rose"
+              />
+              <Stat
+                label="Javobsiz"
+                value={`${data.unanswered_count}/${data.total_questions}`}
+                color="slate"
+              />
+            </div>
+          </div>
+
+          {!isIQTest && (
+            <div className="mt-6 grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
+              <Stat label={t("results.accuracy")} value={`${Math.round(data.accuracy * 100)}%`} />
               <Stat label={t("results.raw_score")} value={data.raw_score} />
               <Stat
                 label={t("results.time_spent")}
@@ -136,64 +179,72 @@ export default function ResultDashboard() {
               />
               <Stat label="Kategoriyalar" value={catData.length} />
             </div>
-          </div>
+          )}
         </motion.section>
 
-        <section className="rounded-3xl border border-slate-200 bg-white/60 p-6 backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
-          <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">
-            {t("results.distribution")}
-          </h2>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart
-                data={bell}
-                margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid stroke="rgba(148,163,184,0.15)" />
-                <XAxis dataKey="x" stroke="#94a3b8" tick={{ fontSize: 12 }} />
-                <YAxis hide />
-                <Tooltip
-                  contentStyle={{
-                    background: "rgba(15,23,42,0.95)",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: 12,
-                    color: "#e2e8f0",
-                  }}
-                  labelFormatter={(v) => `IQ ${v}`}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="y"
-                  stroke="#6366f1"
-                  strokeWidth={2.5}
-                  dot={false}
-                />
-                <ReferenceDot
-                  x={data.iq_score}
-                  y={
-                    bell.reduce((acc, p) =>
-                      Math.abs(p.x - data.iq_score) <
-                      Math.abs(acc.x - data.iq_score)
-                        ? p
-                        : acc
-                    ).y
-                  }
-                  r={7}
-                  fill="#ec4899"
-                  stroke="#fff"
-                  strokeWidth={2}
-                  label={{
-                    value: t("results.your_position"),
-                    position: "top",
-                    fill: "#ec4899",
-                    fontSize: 12,
-                  }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
+        {/* ═══════════════════════════════════════════
+            IQ TEST UCHUN — BELL CURVE
+            ═══════════════════════════════════════════ */}
+        {isIQTest && data.iq_score && (
+          <section className="rounded-3xl border border-slate-200 bg-white/60 p-6 backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
+            <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">
+              {t("results.distribution")}
+            </h2>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={bell}
+                  margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+                >
+                  <CartesianGrid stroke="rgba(148,163,184,0.15)" />
+                  <XAxis dataKey="x" stroke="#94a3b8" tick={{ fontSize: 12 }} />
+                  <YAxis hide />
+                  <Tooltip
+                    contentStyle={{
+                      background: "rgba(15,23,42,0.95)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      borderRadius: 12,
+                      color: "#e2e8f0",
+                    }}
+                    labelFormatter={(v) => `IQ ${v}`}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="y"
+                    stroke="#6366f1"
+                    strokeWidth={2.5}
+                    dot={false}
+                  />
+                  <ReferenceDot
+                    x={data.iq_score}
+                    y={
+                      bell.reduce((acc, p) =>
+                        Math.abs(p.x - data.iq_score) <
+                          Math.abs(acc.x - data.iq_score)
+                          ? p
+                          : acc
+                      ).y
+                    }
+                    r={7}
+                    fill="#ec4899"
+                    stroke="#fff"
+                    strokeWidth={2}
+                    label={{
+                      value: t("results.your_position"),
+                      position: "top",
+                      fill: "#ec4899",
+                      fontSize: 12,
+                    }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+        )}
 
+        {/* ═══════════════════════════════════════════
+            RADAR CHART — barcha testlar uchun
+            ═══════════════════════════════════════════ */}
         {catData.length > 0 && (
           <section className="rounded-3xl border border-slate-200 bg-white/60 p-6 backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
             <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">
@@ -225,50 +276,62 @@ export default function ResultDashboard() {
           </section>
         )}
 
-        <Recommendations iq={data.iq_score} percentile={data.percentile} />
+        {/* Tavsiyalar — faqat IQ uchun */}
+        {isIQTest && data.iq_score && (
+          <Recommendations iq={data.iq_score} percentile={data.percentile} />
+        )}
 
-        <section className="rounded-3xl border border-amber-400/20 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-6 backdrop-blur-xl">
-          <div className="mb-4 flex items-center gap-3">
-            <Crown className="h-6 w-6 text-amber-500 dark:text-amber-400" />
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-              Sertifikat va batafsil hisobot
-            </h2>
-          </div>
-
-          {profile ? (
-            <FeatureGate
-              userPlan={userPlan}
-              requiredPlan="pro"
-              title="Sertifikat olish uchun Pro tarif kerak"
-              description="IQ sertifikatingizni yuklab olish, PDF sifatida saqlash va do‘stlaringizga ulashish uchun Pro tarifga o‘ting."
-            >
-              <div className="flex flex-wrap gap-3">
-                <Link to={`/certificate/${uuid}`} className="btn-primary">
-                  <Award className="h-4 w-4" />
-                  Sertifikatni ko‘rish
-                </Link>
-                <button onClick={() => window.print()} className="btn-ghost">
-                  <Download className="h-4 w-4" />
-                  PDF sifatida saqlash
-                </button>
-              </div>
-            </FeatureGate>
-          ) : (
-            <div className="text-sm text-slate-500 dark:text-slate-400">
-              Sertifikat olish uchun iltimos, akkauntingizga kiring.
+        {/* Sertifikat — faqat IQ uchun */}
+        {isIQTest && (
+          <section className="rounded-3xl border border-amber-400/20 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-6 backdrop-blur-xl">
+            <div className="mb-4 flex items-center gap-3">
+              <Crown className="h-6 w-6 text-amber-500 dark:text-amber-400" />
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                Sertifikat va batafsil hisobot
+              </h2>
             </div>
-          )}
-        </section>
 
+            {profile ? (
+              <FeatureGate
+                userPlan={userPlan}
+                requiredPlan="pro"
+                title="Sertifikat olish uchun Pro tarif kerak"
+                description="IQ sertifikatingizni yuklab olish uchun Pro tarifga o‘ting."
+              >
+                <div className="flex flex-wrap gap-3">
+                  <Link to={`/certificate/${uuid}`} className="btn-primary">
+                    <Award className="h-4 w-4" />
+                    Sertifikatni ko‘rish
+                  </Link>
+                  <button onClick={() => window.print()} className="btn-ghost">
+                    <Download className="h-4 w-4" />
+                    PDF sifatida saqlash
+                  </button>
+                </div>
+              </FeatureGate>
+            ) : (
+              <div className="text-sm text-slate-500 dark:text-slate-400">
+                Sertifikat olish uchun iltimos, akkauntingizga kiring.
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Footer tugmalar */}
         <div className="flex flex-wrap justify-center gap-3 no-print">
-          <Link to="/test" className="btn-ghost">
+          <Link
+            to={`/test/${data.test_category?.code || "iq"}`}
+            className="btn-ghost"
+          >
             <RotateCcw className="h-4 w-4" /> {t("results.retake")}
           </Link>
           <button
             onClick={() =>
               navigator.share?.({
-                title: "Mening IQ natijam",
-                text: `IQ: ${data.iq_score} (${data.percentile}%)`,
+                title: "Mening natijam",
+                text: isIQTest
+                  ? `IQ: ${data.iq_score} (${data.percentile}%)`
+                  : `Natija: ${percentage}%`,
               })
             }
             className="btn-primary"
@@ -281,15 +344,21 @@ export default function ResultDashboard() {
   );
 }
 
-function Stat({ label, value }) {
+function Stat({ label, value, color = "slate" }) {
+  const colorMap = {
+    slate:
+      "border-slate-200 bg-white/60 text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-100",
+    emerald:
+      "border-emerald-400/30 bg-emerald-400/10 text-emerald-600 dark:text-emerald-300",
+    rose: "border-rose-400/30 bg-rose-400/10 text-rose-600 dark:text-rose-300",
+    indigo:
+      "border-indigo-400/30 bg-indigo-400/10 text-indigo-600 dark:text-indigo-300",
+  };
+
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white/60 px-4 py-3 dark:border-white/10 dark:bg-white/5">
-      <div className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">
-        {label}
-      </div>
-      <div className="mt-1 text-xl font-semibold text-slate-900 dark:text-slate-100">
-        {value}
-      </div>
+    <div className={`rounded-2xl border px-4 py-3 ${colorMap[color]}`}>
+      <div className="text-xs uppercase tracking-wide opacity-70">{label}</div>
+      <div className="mt-1 text-xl font-semibold">{value}</div>
     </div>
   );
 }
