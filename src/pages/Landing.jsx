@@ -13,18 +13,20 @@ import {
   Bot,
   Clock,
   Image as ImageIcon,
+  BookMarked,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import api from "../api/client";
 
-// ⭐ "iq" qaytarildi
-const KEEP_CATEGORIES = ["iq", "math", "english", "native"];
+// ⭐ rus tili qo'shildi
+const KEEP_CATEGORIES = ["iq", "math", "english", "native", "russian"];
 
 const ICONS = {
   Brain: Brain,
   Hash: Hash,
   BookOpen: BookOpen,
   Languages: Languages,
+  BookMarked: BookMarked,
 };
 
 export default function Landing() {
@@ -76,14 +78,14 @@ export default function Landing() {
         </motion.div>
       </section>
 
-      {/* Test turlari — 5 ta karta */}
+      {/* Test turlari */}
       <section className="mx-auto max-w-6xl px-4 py-8">
         <h2 className="mb-8 text-center text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">
           Test turlari
         </h2>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {/* 1. Rasm testi — bolalar uchun */}
+          {/* 1. Rasmlar O'yini — bolalar uchun */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -115,7 +117,7 @@ export default function Landing() {
             </Link>
           </motion.div>
 
-          {/* 2-5. Oddiy testlar (IQ, Matematika, Ingliz, Ona tili) */}
+          {/* 2-6. Oddiy testlar */}
           {categories.map((cat, idx) => {
             const Icon = ICONS[cat.icon] || Brain;
             return (
