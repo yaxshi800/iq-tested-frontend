@@ -7,6 +7,7 @@ import Payment from "./pages/Payment";
 import Payments from "./pages/Payments";
 import Profile from "./pages/Profile";
 import TestContainer from "./pages/TestContainer";
+import ImageTest from "./pages/ImageTest";
 import ResultDashboard from "./pages/ResultDashboard";
 import Certificate from "./pages/Certificate";
 import AIAdvisor from "./pages/AIAdvisor";
@@ -19,12 +20,10 @@ function ProtectedRoute({ children }) {
 export default function App() {
   return (
     <Routes>
-      {/* Public routes */}
       <Route path="/" element={<Splash />} />
       <Route path="/login" element={<Login />} />
       <Route path="/pricing" element={<Pricing />} />
 
-      {/* Protected routes */}
       <Route
         path="/home"
         element={
@@ -76,7 +75,16 @@ export default function App() {
         }
       />
 
-      {/* Results */}
+      {/* Rasm testi — bolalar uchun */}
+      <Route
+        path="/images"
+        element={
+          <ProtectedRoute>
+            <ImageTest />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/results/:uuid"
         element={
@@ -93,8 +101,6 @@ export default function App() {
           </ProtectedRoute>
         }
       />
-
-      {/* AI Advisor */}
       <Route
         path="/ai-advisor"
         element={
@@ -104,7 +110,6 @@ export default function App() {
         }
       />
 
-      {/* 404 fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

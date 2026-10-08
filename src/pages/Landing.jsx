@@ -12,9 +12,13 @@ import {
   Crown,
   Bot,
   Clock,
+  Image as ImageIcon,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import api from "../api/client";
+
+// ⭐ "iq" qaytarildi
+const KEEP_CATEGORIES = ["iq", "math", "english", "native"];
 
 const ICONS = {
   Brain: Brain,
@@ -30,7 +34,12 @@ export default function Landing() {
   useEffect(() => {
     api
       .get("/test/categories/")
-      .then((r) => setCategories(r.data))
+      .then((r) => {
+        const filtered = r.data.filter((cat) =>
+          KEEP_CATEGORIES.includes(cat.code)
+        );
+        setCategories(filtered);
+      })
       .catch(() => setCategories([]));
   }, []);
 
@@ -56,14 +65,9 @@ export default function Landing() {
           </p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link to="/test/mixed" className="btn-primary px-8 py-4 text-base">
-              IQ Testni boshlash
-
-              <ArrowRight className="h-5 w-5" />
-            </Link>
             <Link
               to="/ai-advisor"
-              className="inline-flex items-center gap-2 rounded-xl border border-violet-400/40 bg-violet-500/10 px-8 py-4 text-base font-semibold text-violet-600 transition hover:bg-violet-500/20 dark:text-violet-300"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-violet-500/30 transition hover:brightness-110"
             >
               <Bot className="h-5 w-5" />
               AI Yordamchi
@@ -72,14 +76,46 @@ export default function Landing() {
         </motion.div>
       </section>
 
-      {/* ═══════════════════════════════════════════
-          4 TA TEST TURI
-          ═══════════════════════════════════════════ */}
-      <section className="mx-auto max-w-6xl px-4 py-12">
+      {/* Test turlari — 5 ta karta */}
+      <section className="mx-auto max-w-6xl px-4 py-8">
         <h2 className="mb-8 text-center text-2xl font-bold text-slate-900 dark:text-white md:text-3xl">
           Test turlari
         </h2>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {/* 1. Rasm testi — bolalar uchun */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0 }}
+          >
+            <Link
+              to="/images"
+              className="glass group block h-full rounded-3xl p-6 transition hover:border-pink-400/40 hover:shadow-2xl hover:shadow-pink-500/20"
+            >
+              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-pink-500/20 text-pink-500">
+                <ImageIcon className="h-7 w-7" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                Rasmlar O'yini
+              </h3>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                Bolalar uchun — farqli rasmni toping
+              </p>
+              <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                  <Clock className="h-3.5 w-3.5" />
+                  20 savol
+                </div>
+                <span className="flex items-center gap-1 text-sm font-medium text-pink-600 dark:text-pink-400">
+                  Boshlash
+                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                </span>
+              </div>
+            </Link>
+          </motion.div>
+
+          {/* 2-5. Oddiy testlar (IQ, Matematika, Ingliz, Ona tili) */}
           {categories.map((cat, idx) => {
             const Icon = ICONS[cat.icon] || Brain;
             return (
@@ -87,7 +123,7 @@ export default function Landing() {
                 key={cat.code}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.08 }}
+                transition={{ delay: (idx + 1) * 0.08 }}
               >
                 <Link
                   to={`/test/${cat.code}`}
