@@ -24,91 +24,16 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/pricing" element={<Pricing />} />
 
-      <Route
-        path="/home"
-        element={
-          <ProtectedRoute>
-            <Landing />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/payment"
-        element={
-          <ProtectedRoute>
-            <Payment />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/payments"
-        element={
-          <ProtectedRoute>
-            <Payments />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Test routes */}
-      <Route
-        path="/test"
-        element={
-          <ProtectedRoute>
-            <TestContainer />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/test/:category"
-        element={
-          <ProtectedRoute>
-            <TestContainer />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Rasm testi — bolalar uchun */}
-      <Route
-        path="/images"
-        element={
-          <ProtectedRoute>
-            <ImageTest />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/results/:uuid"
-        element={
-          <ProtectedRoute>
-            <ResultDashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/certificate/:uuid"
-        element={
-          <ProtectedRoute>
-            <Certificate />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/ai-advisor"
-        element={
-          <ProtectedRoute>
-            <AIAdvisor />
-          </ProtectedRoute>
-        }
-      />
+      <Route path="/home" element={<ProtectedRoute><Landing /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
+      <Route path="/payments" element={<ProtectedRoute><Payments /></ProtectedRoute>} />
+      <Route path="/test" element={<ProtectedRoute><TestContainer /></ProtectedRoute>} />
+      <Route path="/test/:category" element={<ProtectedRoute><TestContainer /></ProtectedRoute>} />
+      <Route path="/images" element={<ProtectedRoute><ImageTest /></ProtectedRoute>} />
+      <Route path="/results/:uuid" element={<ProtectedRoute><ResultDashboard /></ProtectedRoute>} />
+      <Route path="/certificate/:uuid" element={<ProtectedRoute><Certificate /></ProtectedRoute>} />
+      <Route path="/ai-advisor" element={<ProtectedRoute><AIAdvisor /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

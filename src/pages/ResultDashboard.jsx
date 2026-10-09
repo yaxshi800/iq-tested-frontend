@@ -4,19 +4,9 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Award, RotateCcw, Share2, Download, Crown } from "lucide-react";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceDot,
-  CartesianGrid,
-  Radar,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  ReferenceDot, CartesianGrid,
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer as RC2,
 } from "recharts";
 import { getResults } from "../api/client";
@@ -24,6 +14,7 @@ import api from "../api/client";
 import Navbar from "../components/Navbar";
 import Recommendations from "../components/Recommendations";
 import FeatureGate from "../components/FeatureGate";
+import AchievementToast from "../components/AchievementToast";
 
 function buildBellCurve() {
   const data = [];
@@ -42,65 +33,81 @@ export default function ResultDashboard() {
   const [data, setData] = useState(null);
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
+  const [newAchievements, setNewAchievements] = useState([]);
 
   useEffect(() => {
-    getResults(uuid).then(setData).catch(setError);
+    getResults(uuid)
+      .then((d) => {
+        setData(d);
+        if (d.earned_achievements && d.earned_achievements.length > 0) {
+          setNewAchievements(d.earned_achievements);
+          setTimeout(() => setNewAchievements([]), 6000);
+        }
+      })
+      .catch(setError);
 
     const token = localStorage.getItem("access_token");
     if (token) {
-      api
-        .get("/auth/me/")
-        .then((r) => setProfile(r.data.profile))
-        .catch(() => { });
+      api.get("/auth/me/").then((r) => setProfile(r.data.profile)).catch(() => {});
     }
   }, [uuid]);
 
-  if (error)
-    return <div className="p-10 text-rose-500">Error: {error.message}</div>;
+  if (error) {
+    return <div className="p-10 text-rose-500">Error: {error.message || "Yuklanmadi"}</div>;
+  }
 
-  if (!data)
+  if (!data) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-700 dark:bg-slate-950 dark:text-slate-300">
         <div className="animate-pulse">Yuklanmoqda…</div>
       </div>
     );
+  }
+
+  const safeIq = data.iq_score ?? null;
+  const safePercentile = data.percentile ?? 0;
+  const safeCorrect = data.correct_count ?? 0;
+  const safeWrong = data.wrong_count ?? 0;
+  const safeUnanswered = data.unanswered_count ?? 0;
+  const safeTotal = data.total_questions ?? 0;
+  const safeDuration = data.duration_seconds ?? 0;
+  const safeAccuracy = data.accuracy ?? 0;
+  const safeRawScore = data.raw_score ?? 0;
 
   const bell = buildBellCurve();
   const catData = Object.entries(data.category_breakdown || {}).map(([k, v]) => ({
     category: k,
-    score: v.percentage,
+    score: v?.percentage ?? 0,
   }));
 
   const userPlan = profile?.plan || "free";
-  const isIQTest = data.test_category?.code === "iq";
-  const isMixed = !data.test_category;
-  const percentage = data.total_questions
-    ? Math.round((data.correct_count / data.total_questions) * 100)
-    : 0;
+  const isIQTest = data?.test_category?.code === "iq";
+  const percentage = safeTotal > 0 ? Math.round((safeCorrect / safeTotal) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-indigo-100 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950">
       <Navbar />
+      <AchievementToast
+        achievements={newAchievements}
+        onClose={() => setNewAchievements([])}
+      />
 
       <main className="mx-auto max-w-6xl space-y-8 px-4 py-10">
+        {/* Sarlavha */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-center"
         >
           <h1 className="text-gradient text-3xl font-black tracking-tight md:text-4xl">
-            {data.test_category?.name_uz || t("results.title")}
+            {data?.test_category?.name_uz || t("results.title")}
           </h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            {isIQTest
-              ? "Sizning kognitiv natijangiz tayyor"
-              : "Sizning test natijangiz tayyor"}
+            Sizning test natijangiz tayyor
           </p>
         </motion.div>
 
-        {/* ═══════════════════════════════════════════
-            ASOSIY NATIJA
-            ═══════════════════════════════════════════ */}
+        {/* Asosiy natija */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -109,8 +116,7 @@ export default function ResultDashboard() {
         >
           <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl" />
           <div className="relative grid gap-8 md:grid-cols-2 md:items-center">
-            {/* IQ test uchun */}
-            {isIQTest ? (
+            {isIQTest && safeIq ? (
               <div>
                 <div className="mb-2 text-sm uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
                   {t("results.iq_label")}
@@ -122,16 +128,15 @@ export default function ResultDashboard() {
                     transition={{ type: "spring", stiffness: 180, delay: 0.2 }}
                     className="text-gradient text-8xl font-black leading-none"
                   >
-                    {data.iq_score}
+                    {safeIq}
                   </motion.span>
                   <span className="mb-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-sm text-emerald-600 dark:text-emerald-300">
                     <Award className="mr-1 inline h-4 w-4" />
-                    {data.percentile}%
+                    {safePercentile}%
                   </span>
                 </div>
               </div>
             ) : (
-              /* Boshqa testlar uchun — foiz */
               <div>
                 <div className="mb-2 text-sm uppercase tracking-widest text-indigo-600 dark:text-indigo-300">
                   Natija
@@ -145,57 +150,35 @@ export default function ResultDashboard() {
                   {percentage}%
                 </motion.div>
                 <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                  {data.correct_count} ta to'g'ri javob
+                  {safeCorrect} ta to'g'ri javob
                 </div>
               </div>
             )}
 
             <div className="grid grid-cols-3 gap-4 text-sm">
-              <Stat
-                label="To'g'ri"
-                value={`${data.correct_count}/${data.total_questions}`}
-                color="emerald"
-              />
-              <Stat
-                label="Noto'g'ri"
-                value={`${data.wrong_count}/${data.total_questions}`}
-                color="rose"
-              />
-              <Stat
-                label="Javobsiz"
-                value={`${data.unanswered_count}/${data.total_questions}`}
-                color="slate"
-              />
+              <Stat label="To'g'ri" value={`${safeCorrect}/${safeTotal}`} color="emerald" />
+              <Stat label="Noto'g'ri" value={`${safeWrong}/${safeTotal}`} color="rose" />
+              <Stat label="Javobsiz" value={`${safeUnanswered}/${safeTotal}`} color="slate" />
             </div>
           </div>
 
-          {!isIQTest && (
-            <div className="mt-6 grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
-              <Stat label={t("results.accuracy")} value={`${Math.round(data.accuracy * 100)}%`} />
-              <Stat label={t("results.raw_score")} value={data.raw_score} />
-              <Stat
-                label={t("results.time_spent")}
-                value={`${Math.floor(data.duration_seconds / 60)} daq`}
-              />
-              <Stat label="Kategoriyalar" value={catData.length} />
-            </div>
-          )}
+          <div className="mt-6 grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
+            <Stat label={t("results.accuracy")} value={`${Math.round(safeAccuracy * 100)}%`} />
+            <Stat label={t("results.raw_score")} value={safeRawScore} />
+            <Stat label={t("results.time_spent")} value={`${Math.floor(safeDuration / 60)} daq`} />
+            <Stat label="Kategoriyalar" value={catData.length} />
+          </div>
         </motion.section>
 
-        {/* ═══════════════════════════════════════════
-            IQ TEST UCHUN — BELL CURVE
-            ═══════════════════════════════════════════ */}
-        {isIQTest && data.iq_score && (
+        {/* IQ bell curve */}
+        {isIQTest && safeIq && (
           <section className="rounded-3xl border border-slate-200 bg-white/60 p-6 backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
             <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">
               {t("results.distribution")}
             </h2>
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={bell}
-                  margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
-                >
+                <LineChart data={bell} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
                   <CartesianGrid stroke="rgba(148,163,184,0.15)" />
                   <XAxis dataKey="x" stroke="#94a3b8" tick={{ fontSize: 12 }} />
                   <YAxis hide />
@@ -208,21 +191,12 @@ export default function ResultDashboard() {
                     }}
                     labelFormatter={(v) => `IQ ${v}`}
                   />
-                  <Line
-                    type="monotone"
-                    dataKey="y"
-                    stroke="#6366f1"
-                    strokeWidth={2.5}
-                    dot={false}
-                  />
+                  <Line type="monotone" dataKey="y" stroke="#6366f1" strokeWidth={2.5} dot={false} />
                   <ReferenceDot
-                    x={data.iq_score}
+                    x={safeIq}
                     y={
                       bell.reduce((acc, p) =>
-                        Math.abs(p.x - data.iq_score) <
-                          Math.abs(acc.x - data.iq_score)
-                          ? p
-                          : acc
+                        Math.abs(p.x - safeIq) < Math.abs(acc.x - safeIq) ? p : acc
                       ).y
                     }
                     r={7}
@@ -242,9 +216,7 @@ export default function ResultDashboard() {
           </section>
         )}
 
-        {/* ═══════════════════════════════════════════
-            RADAR CHART — barcha testlar uchun
-            ═══════════════════════════════════════════ */}
+        {/* Radar chart */}
         {catData.length > 0 && (
           <section className="rounded-3xl border border-slate-200 bg-white/60 p-6 backdrop-blur-xl dark:border-white/10 dark:bg-white/5">
             <h2 className="mb-4 text-lg font-semibold text-slate-900 dark:text-white">
@@ -254,34 +226,21 @@ export default function ResultDashboard() {
               <RC2 width="100%" height="100%">
                 <RadarChart data={catData}>
                   <PolarGrid stroke="rgba(148,163,184,0.2)" />
-                  <PolarAngleAxis
-                    dataKey="category"
-                    tick={{ fill: "#64748b", fontSize: 12 }}
-                  />
-                  <PolarRadiusAxis
-                    angle={90}
-                    domain={[0, 100]}
-                    tick={{ fill: "#94a3b8", fontSize: 10 }}
-                  />
-                  <Radar
-                    name="Score"
-                    dataKey="score"
-                    stroke="#6366f1"
-                    fill="#6366f1"
-                    fillOpacity={0.4}
-                  />
+                  <PolarAngleAxis dataKey="category" tick={{ fill: "#64748b", fontSize: 12 }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fill: "#94a3b8", fontSize: 10 }} />
+                  <Radar name="Score" dataKey="score" stroke="#6366f1" fill="#6366f1" fillOpacity={0.4} />
                 </RadarChart>
               </RC2>
             </div>
           </section>
         )}
 
-        {/* Tavsiyalar — faqat IQ uchun */}
-        {isIQTest && data.iq_score && (
-          <Recommendations iq={data.iq_score} percentile={data.percentile} />
+        {/* Recommendations */}
+        {isIQTest && safeIq && (
+          <Recommendations iq={safeIq} percentile={safePercentile} />
         )}
 
-        {/* Sertifikat — faqat IQ uchun */}
+        {/* Sertifikat */}
         {isIQTest && (
           <section className="rounded-3xl border border-amber-400/20 bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-6 backdrop-blur-xl">
             <div className="mb-4 flex items-center gap-3">
@@ -319,19 +278,14 @@ export default function ResultDashboard() {
 
         {/* Footer tugmalar */}
         <div className="flex flex-wrap justify-center gap-3 no-print">
-          <Link
-            to={`/test/${data.test_category?.code || "iq"}`}
-            className="btn-ghost"
-          >
+          <Link to={`/test/${data?.test_category?.code || "math"}`} className="btn-ghost">
             <RotateCcw className="h-4 w-4" /> {t("results.retake")}
           </Link>
           <button
             onClick={() =>
               navigator.share?.({
                 title: "Mening natijam",
-                text: isIQTest
-                  ? `IQ: ${data.iq_score} (${data.percentile}%)`
-                  : `Natija: ${percentage}%`,
+                text: isIQTest ? `IQ: ${safeIq} (${safePercentile}%)` : `Natija: ${percentage}%`,
               })
             }
             className="btn-primary"
@@ -346,13 +300,10 @@ export default function ResultDashboard() {
 
 function Stat({ label, value, color = "slate" }) {
   const colorMap = {
-    slate:
-      "border-slate-200 bg-white/60 text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-100",
-    emerald:
-      "border-emerald-400/30 bg-emerald-400/10 text-emerald-600 dark:text-emerald-300",
+    slate: "border-slate-200 bg-white/60 text-slate-900 dark:border-white/10 dark:bg-white/5 dark:text-slate-100",
+    emerald: "border-emerald-400/30 bg-emerald-400/10 text-emerald-600 dark:text-emerald-300",
     rose: "border-rose-400/30 bg-rose-400/10 text-rose-600 dark:text-rose-300",
-    indigo:
-      "border-indigo-400/30 bg-indigo-400/10 text-indigo-600 dark:text-indigo-300",
+    indigo: "border-indigo-400/30 bg-indigo-400/10 text-indigo-600 dark:text-indigo-300",
   };
 
   return (

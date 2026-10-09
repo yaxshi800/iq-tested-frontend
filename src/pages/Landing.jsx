@@ -3,23 +3,14 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Brain,
-  Hash,
-  BookOpen,
-  Languages,
-  ArrowRight,
-  Sparkles,
-  Crown,
-  Bot,
-  Clock,
-  Image as ImageIcon,
-  BookMarked,
+  Brain, Hash, BookOpen, Languages, BookMarked, GraduationCap,
+  ArrowRight, Sparkles, Crown, Bot, Clock, Image as ImageIcon,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
+import StreakBadge from "../components/StreakBadge";
 import api from "../api/client";
 
-// ⭐ rus tili qo'shildi
-const KEEP_CATEGORIES = ["iq", "math", "english", "native", "russian"];
+const KEEP_CATEGORIES = ["iq", "math", "english", "native", "russian", "teacher"];
 
 const ICONS = {
   Brain: Brain,
@@ -27,6 +18,7 @@ const ICONS = {
   BookOpen: BookOpen,
   Languages: Languages,
   BookMarked: BookMarked,
+  GraduationCap: GraduationCap,
 };
 
 export default function Landing() {
@@ -48,6 +40,7 @@ export default function Landing() {
   return (
     <div className="min-h-screen">
       <Navbar />
+      <StreakBadge />
 
       {/* Hero */}
       <section className="mx-auto max-w-6xl px-4 pt-16 pb-12 text-center md:pt-24">
@@ -85,7 +78,7 @@ export default function Landing() {
         </h2>
 
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {/* 1. Rasmlar O'yini — bolalar uchun */}
+          {/* Rasmlar O'yini */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -117,9 +110,11 @@ export default function Landing() {
             </Link>
           </motion.div>
 
-          {/* 2-6. Oddiy testlar */}
+          {/* Boshqa testlar */}
           {categories.map((cat, idx) => {
             const Icon = ICONS[cat.icon] || Brain;
+            const isTeacher = cat.code === "teacher";
+            const questionCount = isTeacher ? 20 : 30;
             return (
               <motion.div
                 key={cat.code}
@@ -145,7 +140,7 @@ export default function Landing() {
                   <div className="mt-4 flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                       <Clock className="h-3.5 w-3.5" />
-                      {Math.floor(cat.duration_seconds / 60)} daqiqa
+                      {questionCount} savol
                     </div>
                     <span className="flex items-center gap-1 text-sm font-medium text-indigo-600 dark:text-indigo-400">
                       Boshlash
