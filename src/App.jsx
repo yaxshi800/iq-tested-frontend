@@ -11,6 +11,7 @@ import ImageTest from "./pages/ImageTest";
 import ResultDashboard from "./pages/ResultDashboard";
 import Certificate from "./pages/Certificate";
 import AIAdvisor from "./pages/AIAdvisor";
+import Achievements from "./pages/Achievements";   // ⭐ YANGI
 
 function ProtectedRoute({ children }) {
   const token = localStorage.getItem("access_token");
@@ -34,6 +35,9 @@ export default function App() {
       <Route path="/results/:uuid" element={<ProtectedRoute><ResultDashboard /></ProtectedRoute>} />
       <Route path="/certificate/:uuid" element={<ProtectedRoute><Certificate /></ProtectedRoute>} />
       <Route path="/ai-advisor" element={<ProtectedRoute><AIAdvisor /></ProtectedRoute>} />
+
+      {/* ⭐ Achievements sahifasi */}
+      <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

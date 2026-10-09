@@ -15,6 +15,7 @@ import {
   ChevronDown,
   Moon,
   Sun,
+  Award,
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
@@ -110,7 +111,7 @@ export default function Navbar() {
           <button
             onClick={toggle}
             className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-white/10"
-            title={theme === "dark" ? "Yorug‘ rejim" : "Qorong‘i rejim"}
+            title={theme === "dark" ? "Yorug' rejim" : "Qorong'i rejim"}
           >
             {theme === "dark" ? (
               <Sun className="h-4 w-4 text-amber-400" />
@@ -118,6 +119,17 @@ export default function Navbar() {
               <Moon className="h-4 w-4 text-indigo-500" />
             )}
           </button>
+
+          {/* Achievements */}
+          {user && (
+            <Link
+              to="/achievements"
+              className="flex items-center gap-2 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-2 text-sm font-medium text-amber-600 transition hover:bg-amber-400/20 dark:text-amber-300"
+            >
+              <Award className="h-4 w-4" />
+              Yutuqlar
+            </Link>
+          )}
 
           {/* AI Yordamchi */}
           <Link
@@ -165,7 +177,7 @@ export default function Navbar() {
                       {user.username}
                     </div>
                     <div className="text-xs text-slate-500 dark:text-slate-400">
-                      {user.email || "Email yo‘q"}
+                      {user.email || "Email yo'q"}
                     </div>
                   </div>
 
@@ -179,6 +191,16 @@ export default function Navbar() {
                     Profil
                   </Link>
 
+                  {/* Achievements */}
+                  <Link
+                    to="/achievements"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/5"
+                  >
+                    <Award className="h-4 w-4 text-amber-500" />
+                    Yutuqlar
+                  </Link>
+
                   {/* To'lov tarixi */}
                   <Link
                     to="/payments"
@@ -186,7 +208,7 @@ export default function Navbar() {
                     className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/5"
                   >
                     <CreditCard className="h-4 w-4 text-slate-400" />
-                    To‘lov tarixi
+                    To'lov tarixi
                   </Link>
 
                   {/* Tarifni oshirish */}
@@ -229,7 +251,7 @@ export default function Navbar() {
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:brightness-110"
               >
                 <UserPlus className="h-4 w-4" />
-                Ro‘yxatdan o‘tish
+                Ro'yxatdan o'tish
               </Link>
             </>
           )}
@@ -263,6 +285,18 @@ export default function Navbar() {
       {menuOpen && (
         <div className="border-t border-slate-200 bg-white/95 px-4 py-4 backdrop-blur dark:border-white/5 dark:bg-slate-950/95 md:hidden">
           <div className="flex flex-col gap-2">
+            {/* Achievements */}
+            {user && (
+              <Link
+                to="/achievements"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-600 dark:text-amber-300"
+              >
+                <Award className="h-4 w-4" />
+                Yutuqlar
+              </Link>
+            )}
+
             {/* AI Yordamchi */}
             <Link
               to="/ai-advisor"
@@ -317,7 +351,7 @@ export default function Navbar() {
                   className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-200"
                 >
                   <CreditCard className="h-4 w-4" />
-                  To‘lov tarixi
+                  To'lov tarixi
                 </Link>
 
                 {/* Chiqish */}
@@ -348,7 +382,7 @@ export default function Navbar() {
                   className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-4 py-3 text-sm font-semibold text-white"
                 >
                   <UserPlus className="h-4 w-4" />
-                  Ro‘yxatdan o‘tish
+                  Ro'yxatdan o'tish
                 </Link>
               </>
             )}
